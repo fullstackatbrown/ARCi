@@ -4,4 +4,5 @@ export interface InspectionBlock {
   location: string;
   time: string;
   name: string;
+  dateCompleted: string;
 }

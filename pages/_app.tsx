@@ -1,6 +1,6 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { initializeApp } from "firebase/app";
 import { ThemeProvider } from "@mui/material";
 import theme from "../muiconfig";
@@ -20,9 +20,11 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     initializeApp(firebaseConfig);
   }, []);
 
+  const [authorized, setAuthorized] = useState(true);
+
   return (
     <ThemeProvider theme={theme}>
-      <Component {...pageProps} />{" "}
+      <Component {...pageProps} authorized = {authorized} setAuthorized = {setAuthorized} />{" "}
     </ThemeProvider>
   );
 };

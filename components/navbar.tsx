@@ -9,7 +9,6 @@ const Navbar = ({ children }: { children?: ReactNode }) => {
   const options = [
     { name: "Home", href: "" },
     { name: "Dashboard", href: "dashboard" },
-    { name: "Manage", href: "manage" },
     { name: "Review", href: "review" },
     { name: "Organizations", href: "organizations" },
     { name: "Administrators", href: "administrators" },
@@ -38,6 +37,7 @@ const Navbar = ({ children }: { children?: ReactNode }) => {
           sx={{
             display: "flex",
             justifyContent: "center",
+            alignItems: "center",
             width: "100%",
             gap: "0.25rem",
             margin: "1rem 0 0",

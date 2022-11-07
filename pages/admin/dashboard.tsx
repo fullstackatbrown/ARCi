@@ -16,6 +16,7 @@ import Navbar from "../../components/navbar";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   getFirestore,
@@ -23,6 +24,7 @@ import {
 } from "firebase/firestore";
 import { getApp } from "firebase/app";
 import { InspectionBlock } from "../../Types/FB";
+import { DoorBackTwoTone } from "@mui/icons-material";
 
 const Dashboard = () => {
   const [m, setM] = useState(0);
@@ -32,17 +34,30 @@ const Dashboard = () => {
   const [location, setLocation] = useState("CIT");
   const allInspectors = ["Lukas Jarasunas", "Nicky Yarnall"];
   const [inspectors, setInspectors] = useState<string[]>([]);
+  const [error, setError] = useState("");
+  const [inspections, setInspections] = useState<{
+    [name: string]: InspectionBlock;
+  }>({});
 
-  const [inspections, setInspections] = useState<InspectionBlock[]>([]);
+  useEffect(() => {
+    if (m === 0) {
+      setError("");
+    }
+  }, [m]);
 
   useEffect(() => {
     const fun = async () => {
       const db = getFirestore(getApp());
       const col = collection(db, "InspectionBlock");
-      const data = (await getDocs(col)).docs.map((doc) =>
-        doc.data()
-      ) as InspectionBlock[];
-      setInspections(data);
+      const data = (await getDocs(col)).docs;
+      const out = {} as {
+        [name: string]: InspectionBlock;
+      };
+      data.forEach((doc) => {
+        const d = doc.data() as InspectionBlock;
+        out[d.name] = d;
+      });
+      setInspections(out);
     };
 
     setTimeout(() => fun());
@@ -72,16 +87,36 @@ const Dashboard = () => {
     setM(1);
   };
 
-  const create = async () => {
+  const deleteInspection = async (inspection: InspectionBlock) => {
     const db = getFirestore(getApp());
-    const d = doc(db, "InspectionBlock", name);
-    await setDoc(
-      d,
-      { date, time, location, inspectors, name },
-      { merge: true }
-    );
-    setM(0);
-    setName("");
+    await deleteDoc(doc(db, "InspectionBlock", inspection.name));
+    setInspections((d) => {
+      d = { ...d };
+      delete d[inspection.name];
+      return d;
+    });
+  };
+
+  const create = async () => {
+    if (name === "") {
+      setError("Fill out name");
+    } else if (inspectors.length === 0) {
+      setError("Add atleast 1 inspector");
+    } else if (m === 2 && name in inspections) {
+      setError("Name has already been taken");
+    } else {
+      const db = getFirestore(getApp());
+      const d = doc(db, "InspectionBlock", name);
+      const newData = { date, time, location, inspectors, name };
+      await setDoc(d, newData, { merge: true });
+      setInspections((d) => {
+        d = { ...d };
+        d[name] = newData;
+        return d;
+      });
+      setM(0);
+      setName("");
+    }
   };
 
   return (
@@ -106,6 +141,7 @@ const Dashboard = () => {
           <Typography variant="h4">
             {m === 1 ? "Edit " : "Create "} Inspection Block
           </Typography>
+          {error !== "" && <Typography color="error">{error}</Typography>}
           <TextField
             label="Name"
             value={name}
@@ -210,7 +246,7 @@ const Dashboard = () => {
           </Box>
 
           <Grid container spacing={2} sx={{ padding: "0 2rem 2rem" }}>
-            {inspections.map((inspection, i) => (
+            {Object.keys(inspections).map((key, i) => (
               <Grid item xs={4} key={i}>
                 <Box
                   sx={{
@@ -225,20 +261,28 @@ const Dashboard = () => {
                   <Box
                     sx={{ display: "flex", flexDirection: "column", flex: 1 }}
                   >
-                    <Typography>Name: {inspection.name}</Typography>
-                    <Typography>Date: {inspection.date}</Typography>
-                    <Typography>Time: {inspection.time}</Typography>
-                    <Typography>Location: {inspection.location}</Typography>
+                    <Typography>Name: {inspections[key].name}</Typography>
+                    <Typography>Date: {inspections[key].date}</Typography>
+                    <Typography>Time: {inspections[key].time}</Typography>
                     <Typography>
-                      Inspectors: {inspection.inspectors.join(", ")}
+                      Location: {inspections[key].location}
+                    </Typography>
+                    <Typography>
+                      Inspectors: {inspections[key].inspectors.join(", ")}
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <Button
                       color="appBlack"
-                      onClick={() => editInspection(inspection)}
+                      onClick={() => editInspection(inspections[key])}
                     >
                       Edit
+                    </Button>
+                    <Button
+                      color="appBlack"
+                      onClick={() => deleteInspection(inspections[key])}
+                    >
+                      Delete
                     </Button>
                   </Box>
                 </Box>

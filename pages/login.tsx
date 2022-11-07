@@ -5,13 +5,60 @@ import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { Icon } from "@mui/material";
+import GoogleIcon from '@mui/icons-material/Google';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import errors from "../utils/errors";
 
-const Login = () => {
+interface LoginProps {
+  authorized: boolean
+  setAuthorized: boolean
+}
+
+const Login = ({authorized, setAuthorized}: LoginProps) => {
   const loginOptions = [
     { name: "Admin", icon: BorderColorOutlinedIcon },
     { name: "Inspector", icon: VisibilityOutlinedIcon },
     { name: "Lab Member", icon: PeopleAltOutlinedIcon },
   ];
+
+  /**
+   * Redirects the user to a Google sign in page, then creates a session with the SMU API.
+  */
+  async function signInWithGoogle() {
+    const auth = getAuth();
+
+    if (authorized) console.log('hi');
+
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+        'hd': 'brown.edu'
+    });
+
+    return signInWithPopup(auth, provider)
+        .then((userCredential) => {
+            // Signed in
+            console.log(userCredential);
+            return userCredential.user.getIdToken(true);
+        })
+        .catch(() => {
+            throw Error("Invalid credentials");
+        });
+  }
+
+  function handleSignIn() {
+    signInWithGoogle()
+        .then((user) => {
+          console.log('here')
+          console.log(user)
+          console.log('there')
+          // window.location.href = "/"
+        })
+        .catch(() => console.log(errors.UNKNOWN));
+  }
 
   return (
     <>
@@ -94,6 +141,11 @@ const Login = () => {
                     </Box>
                   </Button>
                 ))}
+                <Box mt={2}>
+                    <Button size="large" startIcon={<GoogleIcon/>} variant="contained" onClick={handleSignIn}>
+                        Sign in with Google
+                    </Button>
+                </Box>
               </Box>
             </Box>
           </Box>

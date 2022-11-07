@@ -59,7 +59,7 @@ const Dashboard = () => {
       setInspections(out);
     };
 
-    fun();
+    setTimeout(() => fun());
   }, []);
 
   const select = (inspector: string) => {

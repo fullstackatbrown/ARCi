@@ -4,6 +4,12 @@ import { useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { ThemeProvider } from "@mui/material";
 import theme from "../muiconfig";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
+import ru from "javascript-time-ago/locale/ru.json";
+
+TimeAgo.addDefaultLocale(en);
+TimeAgo.addLocale(ru);
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   useEffect(() => {

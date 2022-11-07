@@ -12,6 +12,7 @@ const Navbar = ({ children }: { children?: ReactNode }) => {
     { name: "Review", href: "review" },
     { name: "Organizations", href: "organizations" },
     { name: "Administrators", href: "administrators" },
+    { name: "Reminders", href: "reminders" },
     { name: "Profile", href: "profile" },
   ];
 
